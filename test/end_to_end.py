@@ -16,13 +16,36 @@ class TestGen:
 
 
 class EndToEndTest(unittest.TestCase):
-
     def setUp(self):
-        self.aset = [1, 2, 3, 1, 2, 2, 3, 1, 2, 2, 3, 8, 4, 2, 2, 1,
-                3, 0, 2, 3, 2, -5, 8]
+        self.aset = [
+            1,
+            2,
+            3,
+            1,
+            2,
+            2,
+            3,
+            1,
+            2,
+            2,
+            3,
+            8,
+            4,
+            2,
+            2,
+            1,
+            3,
+            0,
+            2,
+            3,
+            2,
+            -5,
+            8,
+        ]
 
     def test_outlier_or_warning_detection_class(self):
         from outlier_detector.detectors import OutlierDetector
+
         od = OutlierDetector()
         for el in self.aset:
             res = od.get_outlier_score(el)
@@ -38,6 +61,7 @@ class EndToEndTest(unittest.TestCase):
 
     def test_outlier_detection_class(self):
         from outlier_detector.detectors import OutlierDetector
+
         od = OutlierDetector()
         for el in self.aset:
             res = od.is_outlier(el)
@@ -48,6 +72,7 @@ class EndToEndTest(unittest.TestCase):
 
     def test_warning_detection_class(self):
         from outlier_detector.detectors import OutlierDetector
+
         od = OutlierDetector()
         for el in self.aset:
             res = od.is_outside_sigma_bound(el)
@@ -101,7 +126,7 @@ class EndToEndTest(unittest.TestCase):
 
     def test_filter_recursive(self):
         class TempTestGen(TestGen):
-            @filter_outlier(strategy='recursion')
+            @filter_outlier(strategy="recursion")
             def pop(self):
                 return super().pop()
 
@@ -117,7 +142,7 @@ class EndToEndTest(unittest.TestCase):
 
     def test_filter_iterative(self):
         class TempTestGen(TestGen):
-            @filter_outlier(strategy='iteration')
+            @filter_outlier(strategy="iteration")
             def pop(self):
                 return super().pop()
 
@@ -133,7 +158,7 @@ class EndToEndTest(unittest.TestCase):
 
     def test_filter_raising(self):
         class TempTestGen(TestGen):
-            @filter_outlier(strategy='exception')
+            @filter_outlier(strategy="exception")
             def pop(self):
                 return super().pop()
 

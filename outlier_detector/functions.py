@@ -28,15 +28,16 @@ def get_outlier_score(distribution, new_value, confidence=0.95, sigma_threshold=
     from statistics import stdev
 
     if sigma_threshold <= 0:
-        raise ValueError('Sigma threshold should be greater than 0')
+        raise ValueError("Sigma threshold should be greater than 0")
 
     if is_outlier(distribution, new_value, confidence=confidence):
         return 2
 
     mu = sum(distribution) / float(len(distribution))
     sd = stdev(distribution)
-    if new_value > (mu + float(sigma_threshold) * sd) or \
-            new_value < (mu - float(sigma_threshold) * sd):
+    if new_value > (mu + float(sigma_threshold) * sd) or new_value < (
+        mu - float(sigma_threshold) * sd
+    ):
         return 1
     return 0
 
@@ -65,9 +66,13 @@ def is_outlier(distribution, new_value, confidence=0.95):
     if confidence > 1:
         confidence /= 100
     if not (confidence in Qvals):
-        raise ValueError("Confidence value not tabled, please choose between 0.90, 0.95, and 0.99")
+        raise ValueError(
+            "Confidence value not tabled, please choose between 0.90, 0.95, and 0.99"
+        )
     if len(distribution) < 5 or len(distribution) > 27:
-        raise ValueError('Input distribution must have at least 5 elements and no more than 27')
+        raise ValueError(
+            "Input distribution must have at least 5 elements and no more than 27"
+        )
 
     q_vals = Qvals[confidence]
 

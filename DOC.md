@@ -206,4 +206,3 @@ available confidence steps are: 0.90, 0.95 and 0.99. Defaults to 0.95. Also perc
 **Returns**:
 
 False for valid samples, True for outliers
-

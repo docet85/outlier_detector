@@ -2,17 +2,18 @@ import unittest
 
 
 class ReadMeTests(unittest.TestCase):
-
     def test_function_example(self):
         sample = 2.7
         distribution = [0.1, 1.1, 4.78, 2.0, 7.2, 5.3]
 
         from outlier_detector.functions import is_outlier
+
         print(is_outlier(distribution, sample))
 
     def test_detector_example(self):
         distribution = [0.1, 1.1, 4.78, 2.0, 7.2, 5.3, 8.1, -14.1, 5.4]
         from outlier_detector.detectors import OutlierDetector
+
         od = OutlierDetector(buffer_samples=5)
         for x in distribution:
             print(od.is_outlier(x))
@@ -36,5 +37,5 @@ class ReadMeTests(unittest.TestCase):
                 r = g.pop()
                 print(r)
             except IndexError:
-                print('No more data')
+                print("No more data")
                 return None

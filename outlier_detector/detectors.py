@@ -27,11 +27,15 @@ class OutlierDetector:
         if confidence > 1:
             confidence /= 100
         if not (confidence in Qvals):
-            raise ValueError("Confidence value not tabled, please pick between 0.90, 0.95, and 0.99")
+            raise ValueError(
+                "Confidence value not tabled, please pick between 0.90, 0.95, and 0.99"
+            )
         if buffer_samples < 5 or buffer_samples > 27:
-            raise ValueError('Buffer distribution must have at least 5 elements and no more than 27')
+            raise ValueError(
+                "Buffer distribution must have at least 5 elements and no more than 27"
+            )
         if sigma_threshold <= 0:
-            raise ValueError('Sigma threshold should be greater than 0')
+            raise ValueError("Sigma threshold should be greater than 0")
 
         self.q = Qvals[confidence]
         self.buffer_samples = buffer_samples
@@ -68,13 +72,13 @@ class OutlierDetector:
                 pass
 
             if q > self.q[len(self._buffer)]:
-                del (self._buffer[insertion_point])
+                del self._buffer[insertion_point]
                 return True
 
             if len(self._buffer) > self.buffer_samples:
                 old_sample_position = self._map[0]
-                del (self._map[0])
-                del (self._buffer[old_sample_position])
+                del self._map[0]
+                del self._buffer[old_sample_position]
         else:
             insertion_point = self._sorted_insert(new_sample)
 
@@ -133,17 +137,18 @@ class OutlierDetector:
                 pass
 
             if q > self.q[len(self._buffer)]:
-                del(self._buffer[insertion_point])
+                del self._buffer[insertion_point]
                 return 2  # outlier
 
-            if new_sample > (mu + float(self.sigma) * sd) or \
-                    new_sample < (mu - float(self.sigma) * sd):
+            if new_sample > (mu + float(self.sigma) * sd) or new_sample < (
+                mu - float(self.sigma) * sd
+            ):
                 result = 1  # valid, but outside sigma bound
 
             if len(self._buffer) > self.buffer_samples:
                 old_sample_position = self._map[0]
-                del(self._map[0])
-                del(self._buffer[old_sample_position])
+                del self._map[0]
+                del self._buffer[old_sample_position]
         else:
             insertion_point = self._sorted_insert(new_sample)
 

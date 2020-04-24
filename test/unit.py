@@ -8,7 +8,6 @@ from outlier_detector.functions import get_outlier_score, is_outlier
 
 
 class InputValidation(unittest.TestCase):
-
     def setUp(self) -> None:
         # Since this is a validation tests set then we setup a valid input and override it as needed in tests
         self.dist = [0, 1, 2, 3, 4, 6, 7, 8]
@@ -19,14 +18,20 @@ class InputValidation(unittest.TestCase):
         self.assertRaises(ValueError, get_outlier_score, self.dist[:3], self.sample)
 
     def test_given_long_distribution_then_raise(self):
-        self.assertRaises(ValueError, get_outlier_score, self.dist*4, self.sample)
+        self.assertRaises(ValueError, get_outlier_score, self.dist * 4, self.sample)
 
     def test_given_invalid_confidence_then_raise(self):
-        self.assertRaises(ValueError, get_outlier_score, self.dist, self.sample, confidence=0.2)
+        self.assertRaises(
+            ValueError, get_outlier_score, self.dist, self.sample, confidence=0.2
+        )
 
     def test_given_invalid_sigma_threshold_then_raise(self):
-        self.assertRaises(ValueError, get_outlier_score, self.dist, self.sample, sigma_threshold=0)
-        self.assertRaises(ValueError, get_outlier_score, self.dist, self.sample, sigma_threshold=-1)
+        self.assertRaises(
+            ValueError, get_outlier_score, self.dist, self.sample, sigma_threshold=0
+        )
+        self.assertRaises(
+            ValueError, get_outlier_score, self.dist, self.sample, sigma_threshold=-1
+        )
 
     def test_given_valid_inputs_then_return_a_value(self):
         val = get_outlier_score(self.dist, self.sample)
@@ -39,19 +44,27 @@ class InputValidation(unittest.TestCase):
     # Filter
     def test_given_invalid_strategy_then_raise(self):
         try:
+
             class FailGen:
-                @filter_outlier(strategy='invalid')
+                @filter_outlier(strategy="invalid")
                 def pop(self):
                     pass
+
             fg = FailGen()
             self.fail("The decorator strategy is invalid")
         except ValueError:
             pass
 
-    @patch('outlier_detector.detectors.OutlierDetector.is_outlier', return_value=False)
-    @patch('outlier_detector.detectors.OutlierDetector.__init__', return_value=None)
-    def test_given_extra_input_to_decorator_then_they_are_forwarded_to_detector(self, mock, _):
-        extra_kwargs_for_detector = {'sigma_threshold': 4, 'confidence': 0.99, 'buffer_samples': 10}
+    @patch("outlier_detector.detectors.OutlierDetector.is_outlier", return_value=False)
+    @patch("outlier_detector.detectors.OutlierDetector.__init__", return_value=None)
+    def test_given_extra_input_to_decorator_then_they_are_forwarded_to_detector(
+        self, mock, _
+    ):
+        extra_kwargs_for_detector = {
+            "sigma_threshold": 4,
+            "confidence": 0.99,
+            "buffer_samples": 10,
+        }
 
         class GenForward:
             @filter_outlier(**extra_kwargs_for_detector)
@@ -80,6 +93,7 @@ class InputValidation(unittest.TestCase):
 
     def test_given_valid_sigma_threshold_for_detector_then_set_it(self):
         from outlier_detector import Qvals
+
         od = OutlierDetector(confidence=0.99)
         self.assertEqual(od.q, Qvals[0.99], "Confidence error")
         od = OutlierDetector(confidence=99)
@@ -149,7 +163,9 @@ class AuxiliaryTest(unittest.TestCase):
             pass
 
         try:
-            self.test_filter._sorted_insert(4, len(self.test_even_sequence) + 2, len(self.test_even_sequence))
+            self.test_filter._sorted_insert(
+                4, len(self.test_even_sequence) + 2, len(self.test_even_sequence)
+            )
             self.fail("Start out of bounds, assertion fail expected")
         except AssertionError:
             pass
@@ -188,40 +204,53 @@ class AuxiliaryTest(unittest.TestCase):
 
 
 class FunctionalTests(unittest.TestCase):
-
     def test_given_flat_distr_return_no_outlier(self):
         value = 2
-        distr = [value]*10
+        distr = [value] * 10
         o = is_outlier(distr, value)
         self.assertFalse(o, "No outlier expected for flat distribution (is_outlier)")
         s = get_outlier_score(distr, value)
-        self.assertEqual(s, 0, "No outlier expected for flat distribution (get_outlier_score)")
+        self.assertEqual(
+            s, 0, "No outlier expected for flat distribution (get_outlier_score)"
+        )
 
         od = OutlierDetector()
         od._buffer = distr
         o = od.is_outlier(value)
-        self.assertFalse(o, "No outlier expected for flat distribution (detector.is_outlier)")
+        self.assertFalse(
+            o, "No outlier expected for flat distribution (detector.is_outlier)"
+        )
         s = od.get_outlier_score(value)
-        self.assertEqual(s, 0, "No outlier expected for flat distribution (detector.get_outlier_score)")
+        self.assertEqual(
+            s,
+            0,
+            "No outlier expected for flat distribution (detector.get_outlier_score)",
+        )
 
         class Gen:
-            @filter_outlier(distribution_id='test', strategy='exception')
+            @filter_outlier(distribution_id="test", strategy="exception")
             def pop(self):
                 return value
+
         g = Gen()
         g.pop()
         from outlier_detector.filters import __alive_filters__
-        __alive_filters__['test']._buffer = distr
-        self.assertEqual(value, g.pop(), 'No outlier expected for flat distribution (filter)')
+
+        __alive_filters__["test"]._buffer = distr
+        self.assertEqual(
+            value, g.pop(), "No outlier expected for flat distribution (filter)"
+        )
 
     def test_given_filter_with_known_id_when_remove_it_is_no_more_available(self):
         class Gen:
-            @filter_outlier(distribution_id='test', strategy='exception')
+            @filter_outlier(distribution_id="test", strategy="exception")
             def pop(self):
                 return 0
+
         g = Gen()
         g.pop()
         from outlier_detector.filters import __alive_filters__, destroy_filter
-        self.assertIn('test',__alive_filters__)
-        destroy_filter('test')
-        self.assertNotIn('test',__alive_filters__)
+
+        self.assertIn("test", __alive_filters__)
+        destroy_filter("test")
+        self.assertNotIn("test", __alive_filters__)

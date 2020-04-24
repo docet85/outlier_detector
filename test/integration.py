@@ -15,14 +15,36 @@ class TestGen:
 
 
 class IntegrityTest(unittest.TestCase):
-
     def setUp(self):
-        self.aset = [1, 2, 3, 1, 2, 2, 3, 1, 2, 2, 3, 8, 4, 2, 2, 1,
-                3, 0, 2, 3, 2, -5, 8]
+        self.aset = [
+            1,
+            2,
+            3,
+            1,
+            2,
+            2,
+            3,
+            1,
+            2,
+            2,
+            3,
+            8,
+            4,
+            2,
+            2,
+            1,
+            3,
+            0,
+            2,
+            3,
+            2,
+            -5,
+            8,
+        ]
 
     def test_filter_crosstalk(self):
         class TempTestGen(TestGen):
-            @filter_outlier(strategy='recursion')
+            @filter_outlier(strategy="recursion")
             def pop(self):
                 return super().pop()
 
@@ -41,9 +63,8 @@ class IntegrityTest(unittest.TestCase):
             self.assertGreaterEqual(r2, 5, "Not filtered outlier")
 
     def test_filter_shared_buffer(self):
-
         class TempTestGenTwo(TestGen):
-            @filter_outlier(strategy='recursion', distribution_id=1)
+            @filter_outlier(strategy="recursion", distribution_id=1)
             def pop(self):
                 return super().pop()
 
@@ -51,6 +72,7 @@ class IntegrityTest(unittest.TestCase):
         tg_offset = TempTestGenTwo([x + 1 for x in self.aset])
         counter = 0
         from outlier_detector.filters import __alive_filters__
+
         while counter < len(self.aset):
             try:
                 r = tg.pop()
@@ -62,4 +84,3 @@ class IntegrityTest(unittest.TestCase):
             self.assertGreaterEqual(r, 0, "Not filtered outlier")
             self.assertLessEqual(r2, 5, "Not filtered outlier")
             self.assertGreaterEqual(r2, 0, "Not filtered outlier")
-
