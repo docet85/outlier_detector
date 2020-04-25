@@ -3,7 +3,7 @@ import unittest
 
 class ReadMeTests(unittest.TestCase):
     def test_function_example(self):
-        sample = 2.7
+        sample = -14.5
         distribution = [0.1, 1.1, 4.78, 2.0, 7.2, 5.3]
 
         from outlier_detector.functions import is_outlier
@@ -38,4 +38,4 @@ class ReadMeTests(unittest.TestCase):
                 print(r)
             except IndexError:
                 print("No more data")
-                return None
+                break

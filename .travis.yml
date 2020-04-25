@@ -1,14 +1,20 @@
 language: python
 python:
-  - "3.6"      # current default Python on Travis CI
-  - "3.7"
-  - "3.8"
-  - "3.8-dev"  # 3.8 development branch
-  - "nightly"  # nightly build
-# command to install dependencies
+- '3.6'
+- '3.7'
+- '3.8'
+- 3.8-dev
+- nightly
 install:
-  - pip install -r ci_requirements.txt
+- pip install -r ci_requirements.txt
 script:
-  - coverage run --source='outlier_detector' -m unittest test/*.py
+- coverage run --source='outlier_detector' -m unittest test/*.py
 after_success:
-  - codecov
+- codecov
+deploy:
+  provider: pypi
+  user: __token__
+  password:
+    secure: jJeUhBIHNggrIbGbO063YpKbMpwUsc3+N3XbxRSRZSnw6yqEQBqVIU5N58BhiRbq5KufAOMgUjTQNkLFx7j97bwSnPFa4WZp8pF6x1fO2DJFaaMDhE9jLqUfSSQgBBbGsAP8xj+zLKUxqX2+khjcjkVHFLXs9msd9VAmCbA4lz213witOE41ndQ26AWFWGnGaWAa1Cc0MbPy/JFmyydnUKnmuRCrdlIpuuH7nATVgZsh9uiA7V5PfFlkriFqRIbiXR2XbyUOIohGgtl2VLSDSfF98LD0RP/ft/88AMloSap+Rqgy1T2mnjcWgS6Dv0lag57qYZoeulUOWP+so7/P0xWL9CW0/LvLXJuTgc0XpM8XXpt2nucv8n1HSyVIlAWmKBEoMRNtireMaQTI53zudXiHgJ6ur1pBhPV4t1NzAQJvh8P/P+a5wyFYgvifEbDjmp7d9aSxkpWAwc+pa1TL/Q/Ne+EarFsLZUvV1MJt15ckcBtzyAtldjix7MeGayBMni1Uoo4cVgtfeL4YJ0cM4GDGqerwziCZWi0HDrj3wgyD/nw1VsIkboVWYpYxEvoF3ArBFd1n9QXwBSCmSn45geOkiZOTEQ50J++i7+2TK7yNgSY+gY+xDJuiPglBL4avIBXZPIBfVSYEI3Aji4Apq1qGekRN/OrhN6G9VJwQBvI=
+  on:
+    tags: true

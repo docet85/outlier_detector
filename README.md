@@ -10,12 +10,17 @@ as they come to your Python analysis code.
 
 Most of the tools rely on double tailed Dixon's Q-test (https://en.wikipedia.org/wiki/Dixon%27s_Q_test).
 
+## Installation
+```bash
+pip install outlier-detector
+```
+
 ## TL;DR
 <details>
    <summary>I have a <code>sample</code>, and a know data <code>distribution</code>: is the sample an outlier?</summary>
 
 ```python
-sample = 2.7
+sample = -14.5
 distribution = [0.1, 1.1, 4.78, 2.0, 7.2, 5.3]
 
 from outlier_detector.functions import is_outlier
@@ -25,20 +30,21 @@ print(is_outlier(distribution, sample))
 </details>
 
 <details>
-   <summary>I have a <code>distribution</code> and I iterate over it: is the n-th sample
-   is an outlier?</summary>
+   <summary>I have a <code>distribution</code> and I iterate over it: is the n-th <code>sample</code>
+   an outlier?</summary>
 
 ```python
-distribution = [0.1, 1.1, 4.78, 2.0, 7.2, 5.3, 8.1, -4.1, 5.4]
+distribution = [0.1, 1.1, 4.78, 2.0, 7.2, 5.3, 8.1, -14.1, 5.4]
 from outlier_detector.detectors import OutlierDetector
 od = OutlierDetector(buffer_samples=5)
-for x in distribution:
-    print(od.is_outlier(x))
+for sample in distribution:
+    print(od.is_outlier(sample))
 ```
 </details>
 
 <details>
-   <summary>I have a generating object from which I <code>pop</code> samples and I want only valid samples, rejecting outliers.</summary>
+   <summary>I have a generating object from which I <code>pop</code> samples; and I want only valid samples:
+    how can I reject outliers?</summary>
 
 ```python
 distribution = [0.1, 1.1, 4.78, 2.0, 7.2, 5.3, 8.1, -14.1, 5.4]
@@ -60,6 +66,7 @@ while True:
         print(r)
     except IndexError:
         print('No more data')
+        break
 
 ```
 </details>
