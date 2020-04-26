@@ -1,7 +1,7 @@
 from time import time
 import unittest
 
-from exceptions import OutlierException
+from outlier_detector.exceptions import OutlierException
 from outlier_detector.filters import filter_outlier, OutlierFilter
 
 

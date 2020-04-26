@@ -4,7 +4,7 @@ from uuid import uuid4
 __alive_filters__ = {}
 __strategies__ = ["recursion", "iteration", "exception"]
 
-from exceptions import OutlierException
+from outlier_detector.exceptions import OutlierException
 from outlier_detector.detectors import OutlierDetector
 import logging
 
