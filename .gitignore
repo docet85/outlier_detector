@@ -97,3 +97,4 @@ distrib*
 /dist/
 /outlier_detector.egg-info/
 /htmlcov/
+/.coverage

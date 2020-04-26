@@ -17,8 +17,6 @@ def filter_outlier(
     function, iteratively call the wrapped function or raising a ``ValueError``. Relies on ``OutlierDetector`` whose
     args can be forwarded using the proper argument.
 
-    :rtype: function
-
     :type distribution_id: any
     :type strategy: str
 
@@ -39,49 +37,52 @@ def filter_outlier(
     else:
         d_id = distribution_id
 
-    def recursive_outlier_filter_generator(func):
-        def wrapper(*args, **kwargs):
-            od = _retrieve_filter_instance(
-                func, args, d_id, distribution_id, **outlier_detector_kwargs
-            )
-            sample = func(*args, **kwargs)
-            if od.is_outlier(sample):
-                return wrapper(*args, **kwargs)
-            else:
-                return sample
-
-        return wrapper
-
-    def iterative_outlier_filter_generator(func):
-        def wrapper(*args, **kwargs):
-            od = _retrieve_filter_instance(
-                func, args, d_id, distribution_id, **outlier_detector_kwargs
-            )
-            sample = func(*args, **kwargs)
-            while od.is_outlier(sample):
-                sample = func(*args, **kwargs)
-            return sample
-
-        return wrapper
-
-    def exception_outlier_filter_generator(func):
-        def wrapper(*args, **kwargs):
-            od = _retrieve_filter_instance(
-                func, args, d_id, distribution_id, **outlier_detector_kwargs
-            )
-            sample = func(*args, **kwargs)
-            if od.is_outlier(sample):
-                raise OutlierException("Detected Outlier in distribution", sample)
-            else:
-                return sample
-
-        return wrapper
-
     if strategy == "iteration":
+
+        def iterative_outlier_filter_generator(func):
+            def wrapper(*args, **kwargs):
+                od = _retrieve_filter_instance(
+                    func, args, d_id, distribution_id, **outlier_detector_kwargs
+                )
+                sample = func(*args, **kwargs)
+                while od.is_outlier(sample):
+                    sample = func(*args, **kwargs)
+                return sample
+
+            return wrapper
+
         return iterative_outlier_filter_generator
     elif strategy == "exception":
+
+        def exception_outlier_filter_generator(func):
+            def wrapper(*args, **kwargs):
+                od = _retrieve_filter_instance(
+                    func, args, d_id, distribution_id, **outlier_detector_kwargs
+                )
+                sample = func(*args, **kwargs)
+                if od.is_outlier(sample):
+                    raise OutlierException("Detected Outlier in distribution", sample)
+                else:
+                    return sample
+
+            return wrapper
+
         return exception_outlier_filter_generator
     else:
+
+        def recursive_outlier_filter_generator(func):
+            def wrapper(*args, **kwargs):
+                od = _retrieve_filter_instance(
+                    func, args, d_id, distribution_id, **outlier_detector_kwargs
+                )
+                sample = func(*args, **kwargs)
+                if od.is_outlier(sample):
+                    return wrapper(*args, **kwargs)
+                else:
+                    return sample
+
+            return wrapper
+
         return recursive_outlier_filter_generator
 
 
@@ -144,7 +145,7 @@ class OutlierFilter(OutlierDetector):
                 self.__outlier_counter__ = 0
             else:
                 if self.strategy == "exception":
-                    raise ValueError("Detected Outlier in distribution: {}", sample)
+                    raise OutlierException("Detected Outlier in distribution", sample)
                 if self.limit is not None:
                     self.__outlier_counter__ += 1
         raise StopIteration("Limit hit for subsequent outliers discarded.")
