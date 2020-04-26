@@ -4,7 +4,9 @@ from uuid import uuid4
 __alive_filters__ = {}
 __strategies__ = ["recursion", "iteration", "exception"]
 
+from exceptions import OutlierException
 from outlier_detector.detectors import OutlierDetector
+import logging
 
 
 def filter_outlier(
@@ -26,7 +28,11 @@ def filter_outlier(
     :param outlier_detector_kwargs: the constructor arguments for the underlying detector
     """
     if strategy not in __strategies__:
-        raise ValueError("Strategy {} unknown, please pick one in {}", strategy, [])
+        raise ValueError(
+            'Strategy "{}" unknown, please pick one in {}'.format(
+                strategy, __strategies__
+            )
+        )
 
     if distribution_id is None:
         d_id = uuid4()
@@ -65,7 +71,7 @@ def filter_outlier(
             )
             sample = func(*args, **kwargs)
             if od.is_outlier(sample):
-                raise ValueError("Detected Outlier in distribution")
+                raise OutlierException("Detected Outlier in distribution", sample)
             else:
                 return sample
 
@@ -100,3 +106,45 @@ def _retrieve_filter_instance(
     if d_id not in __alive_filters__:
         __alive_filters__[d_id] = OutlierDetector(**outlier_detector_kwargs)
     return __alive_filters__[d_id]
+
+
+class OutlierFilter(OutlierDetector):
+    def __init__(self, strategy="iteration", limit=None, **kwargs):
+        if strategy not in __strategies__:
+            raise ValueError(
+                'Strategy "{}" unknown, please pick one in {}'.format(
+                    strategy, __strategies__
+                )
+            )
+
+        OutlierDetector.__init__(self, **kwargs)
+
+        if strategy == "recursion":
+            logging.warning(
+                "Recursion strategy not available for iterator, fallback to iteration with limit=20"
+            )
+            strategy = "iteration"
+            limit = 20
+        elif strategy != "iteration" and limit is not None:
+            logging.warning(
+                "limit={} has no effect with strategy {}".format(limit, strategy)
+            )
+            limit = None
+
+        self.limit = limit
+        self.strategy = strategy
+        self.__outlier_counter__ = 0
+
+    def filter(self, func, *args, **kwargs):
+        self.__outlier_counter__ = 0
+        while self.limit is None or self.__outlier_counter__ <= self.limit:
+            sample = func(*args, **kwargs)
+            if not self.is_outlier(sample):
+                yield sample
+                self.__outlier_counter__ = 0
+            else:
+                if self.strategy == "exception":
+                    raise ValueError("Detected Outlier in distribution: {}", sample)
+                if self.limit is not None:
+                    self.__outlier_counter__ += 1
+        raise StopIteration("Limit hit for subsequent outliers discarded.")

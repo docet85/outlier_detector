@@ -2,7 +2,7 @@ import unittest
 from copy import copy
 from unittest.mock import patch
 
-from outlier_detector.filters import filter_outlier
+from outlier_detector.filters import filter_outlier, OutlierFilter
 from outlier_detector.detectors import OutlierDetector
 from outlier_detector.functions import get_outlier_score, is_outlier
 
@@ -42,7 +42,7 @@ class InputValidation(unittest.TestCase):
         self.assertIsNotNone(val)
 
     # Filter
-    def test_given_invalid_strategy_then_raise(self):
+    def test_given_invalid_strategy_decorator_then_raise(self):
         try:
 
             class FailGen:
@@ -51,7 +51,7 @@ class InputValidation(unittest.TestCase):
                     pass
 
             fg = FailGen()
-            self.fail("The decorator strategy is invalid")
+            self.fail("The decorator strategy is not rejected as invalid")
         except ValueError:
             pass
 
@@ -73,6 +73,39 @@ class InputValidation(unittest.TestCase):
 
         fg = GenForward()
         fg.pop()
+
+        self.assertTrue(mock.called)
+        self.assertEqual(mock.call_args[1], extra_kwargs_for_detector)
+
+    def test_given_invalid_strategy_object_then_raise(self):
+        try:
+            OutlierFilter(strategy="invalid")
+            self.fail("The decorator strategy is invalid")
+        except ValueError:
+            pass
+
+    def test_given_recursion_strategy_object_then_fallback_iterative_limit_20(self):
+        od = OutlierFilter(strategy="recursion")
+        self.assertEqual(od.strategy, "iteration")
+        self.assertEqual(od.limit, 20)
+
+    def test_given_exception_strategy_with_limit_object_then_ignore_limit(self):
+        od = OutlierFilter(strategy="exception", limit=10)
+        self.assertEqual(od.strategy, "exception")
+        self.assertIsNone(od.limit)
+
+    @patch("outlier_detector.detectors.OutlierDetector.is_outlier", return_value=False)
+    @patch("outlier_detector.detectors.OutlierDetector.__init__", return_value=None)
+    def test_given_extra_input_to_outlier_filter_then_they_are_forwarded_to_detector(
+        self, mock, _
+    ):
+        extra_kwargs_for_detector = {
+            "sigma_threshold": 4,
+            "confidence": 0.99,
+            "buffer_samples": 10,
+        }
+
+        of = OutlierFilter(strategy="iteration", limit=15, **extra_kwargs_for_detector)
 
         self.assertTrue(mock.called)
         self.assertEqual(mock.call_args[1], extra_kwargs_for_detector)

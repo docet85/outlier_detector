@@ -1,5 +1,7 @@
 import unittest
 
+from logging import debug as print
+
 
 class ReadMeTests(unittest.TestCase):
     def test_function_example(self):
