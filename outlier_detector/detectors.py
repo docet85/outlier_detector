@@ -11,12 +11,8 @@ class OutlierDetector:
     **sigma**, **mean** + ``sigma_threshold``  **sigma** ).
     """
 
-    def __init__(self, confidence=0.95, buffer_samples=14, sigma_threshold=2):
+    def __init__(self, confidence: float = 0.95, buffer_samples: int = 14, sigma_threshold: float = 2) -> None:
         """
-        :type buffer_samples: int
-        :type confidence: float
-        :type sigma_threshold: float
-
         :param buffer_samples: Accepted length is between 5 and 27 samples.
         :param confidence: The confidence for the outlier estimation: since Dixon's test relies on tabled values the
                available confidence steps are: 0.90, 0.95 and 0.99. Defaults to 0.95. Also percentage values are
@@ -44,13 +40,12 @@ class OutlierDetector:
         self._map = []
         return
 
-    def is_outlier(self, new_sample):
+    def is_outlier(self, new_sample: float) -> bool:
         """
         Evaluates the incoming sample and (in case it is valid) stores it in internal buffer.
 
         Testes if the sample an outlier is an outlier based on Dixon's Q-test with given confidence.
 
-        :type new_sample: float
         :param new_sample: distribution new sample
         :return: true in case the sample is outlier
         """

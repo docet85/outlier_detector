@@ -1,4 +1,3 @@
-from time import time
 import unittest
 
 from outlier_detector.exceptions import OutlierException
