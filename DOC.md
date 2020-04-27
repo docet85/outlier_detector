@@ -1,25 +1,17 @@
-<a name=".outlier_detector"></a>
-## outlier\_detector
+<a name=".filters"></a>
+## filters
 
-<a name=".outlier_detector.filters"></a>
-## outlier\_detector.filters
-
-<a name=".outlier_detector.filters.filter_outlier"></a>
+<a name=".filters.filter_outlier"></a>
 #### filter\_outlier
 
 ```python
-filter_outlier(distribution_id=None, strategy='recursion', **outlier_detector_kwargs)
+filter_outlier(distribution_id: Any = None, strategy: str = "recursion", **outlier_detector_kwargs: Dict) -> Callable
 ```
 
 Wraps a generic "pop" or "get" function, returning a sample of a gaussian distribution, with an outlier filter.
 When meeting an outlier the filter omits it and, depending on the strategy, it may call recursively the wrapped
 function, iteratively call the wrapped function or raising a ``ValueError``. Relies on ``OutlierDetector`` whose
 args can be forwarded using the proper argument.
-
-:rtype: function
-
-:type distribution_id: any
-:type strategy: str
 
 **Arguments**:
 
@@ -28,11 +20,16 @@ wrapping a method, the first argument hash is used as default.
 - `strategy`: 'recursion', 'iteration' or 'exception'
 - `outlier_detector_kwargs`: the constructor arguments for the underlying detector
 
-<a name=".outlier_detector.filters.destroy_filter"></a>
+**Raises**:
+
+- `ValueError`: when strategy is invalid
+- `OutlierException`: when strategy is 'exception' and an outlier is found
+
+<a name=".filters.destroy_filter"></a>
 #### destroy\_filter
 
 ```python
-destroy_filter(distribution_id)
+destroy_filter(distribution_id: Any)
 ```
 
 Given an assigned distribution id, destroys the associated detector below the filter. Since the detector
@@ -42,10 +39,59 @@ is a singleton instantiated on demand, this is the final effect of deleting the 
 
 - `distribution_id`: the id associated toa filter on decoration
 
-<a name=".outlier_detector.detectors"></a>
-## outlier\_detector.detectors
+<a name=".filters.OutlierFilter"></a>
+### OutlierFilter
 
-<a name=".outlier_detector.detectors.OutlierDetector"></a>
+```python
+class OutlierFilter(OutlierDetector)
+```
+
+Exploits an OutlierDetector to expose the same functionality of the filter decorator.
+It wraps a generic "pop" or "get" function, returning a sample of a gaussian distribution, with an outlier filter.
+When meeting an outlier the filter omits it and, depending on the strategy, it may raise a ``ValueError``.
+Relies on ``OutlierDetector`` whose args can be forwarded using the proper argument.
+
+<a name=".filters.OutlierFilter.__init__"></a>
+#### \_\_init\_\_
+
+```python
+ | __init__(strategy="iteration", limit=None, **outlier_detector_kwargs)
+```
+
+**Arguments**:
+
+- `distribution_id`: unique identifier for the distribution. In case empty, this is inferred runtime. In case
+wrapping a method, the first argument hash is used as default.
+- `strategy`: 'recursion', 'iteration' or 'exception'
+- `outlier_detector_kwargs`: the constructor arguments for the underlying detector
+
+**Raises**:
+
+- `ValueError`: when strategy is invalid
+
+<a name=".filters.OutlierFilter.filter"></a>
+#### filter
+
+```python
+ | filter(func: Callable, *args: List, **kwargs: Dict) -> float
+```
+
+**Raises**:
+
+- `OutlierException`: when strategy is 'exception' and an outlier is found
+
+**Arguments**:
+
+- `func`:
+- `args`:
+- `kwargs`:
+
+**Returns**:
+
+<a name=".detectors"></a>
+## detectors
+
+<a name=".detectors.OutlierDetector"></a>
 ### OutlierDetector
 
 ```python
@@ -58,16 +104,12 @@ the stored distribution samples in buffer. It computes a double tailed Dixon's Q
 , along with testing the standard deviation of the new value considering the boundary (**mean** -``sigma_threshold``
 **sigma**, **mean** + ``sigma_threshold``  **sigma** ).
 
-<a name=".outlier_detector.detectors.OutlierDetector.__init__"></a>
+<a name=".detectors.OutlierDetector.__init__"></a>
 #### \_\_init\_\_
 
 ```python
- | __init__(confidence=0.95, buffer_samples=14, sigma_threshold=2)
+ | __init__(confidence: float = 0.95, buffer_samples: int = 14, sigma_threshold: float = 2) -> None
 ```
-
-:type buffer_samples: int
-:type confidence: float
-:type sigma_threshold: float
 
 **Arguments**:
 
@@ -78,18 +120,16 @@ accepted (i.e. 90, 95 and 99).
 - `sigma_threshold`: multiplier for further analysis, samples outside the sigma range are marked as "warning"
 It must be greater than 0.
 
-<a name=".outlier_detector.detectors.OutlierDetector.is_outlier"></a>
+<a name=".detectors.OutlierDetector.is_outlier"></a>
 #### is\_outlier
 
 ```python
- | is_outlier(new_sample)
+ | is_outlier(new_sample: float) -> bool
 ```
 
 Evaluates the incoming sample and (in case it is valid) stores it in internal buffer.
 
 Testes if the sample an outlier is an outlier based on Dixon's Q-test with given confidence.
-
-:type new_sample: float
 
 **Arguments**:
 
@@ -99,18 +139,16 @@ Testes if the sample an outlier is an outlier based on Dixon's Q-test with given
 
 true in case the sample is outlier
 
-<a name=".outlier_detector.detectors.OutlierDetector.is_outside_sigma_bound"></a>
+<a name=".detectors.OutlierDetector.is_outside_sigma_bound"></a>
 #### is\_outside\_sigma\_bound
 
 ```python
- | is_outside_sigma_bound(new_sample)
+ | is_outside_sigma_bound(new_sample: float) -> bool
 ```
 
 Evaluates the incoming sample and (in case it is valid) stores it in internal buffer.
 
 In case the new value is valid the result is False, otherwise if outside the sigma threshold.
-
-:type new_sample: float
 
 **Arguments**:
 
@@ -120,18 +158,17 @@ In case the new value is valid the result is False, otherwise if outside the sig
 
 True for "warnings" and False for valid samples
 
-<a name=".outlier_detector.detectors.OutlierDetector.get_outlier_score"></a>
+<a name=".detectors.OutlierDetector.get_outlier_score"></a>
 #### get\_outlier\_score
 
 ```python
- | get_outlier_score(new_sample)
+ | get_outlier_score(new_sample: float) -> int
 ```
 
 Evaluates the incoming sample and (in case it is valid) stores it in internal buffer.
 
 In case the new value is valid the result is 0, otherwise 1 (outside the sigma threshold) or 2 an outlier
 based on Dixon's Q-test with given confidence.
-:type new_sample: float
 
 **Arguments**:
 
@@ -141,14 +178,14 @@ based on Dixon's Q-test with given confidence.
 
 0 for valid samples, 1 for warning, 2 for outliers
 
-<a name=".outlier_detector.functions"></a>
-## outlier\_detector.functions
+<a name=".functions"></a>
+## functions
 
-<a name=".outlier_detector.functions.get_outlier_score"></a>
+<a name=".functions.get_outlier_score"></a>
 #### get\_outlier\_score
 
 ```python
-get_outlier_score(distribution, new_value, confidence=0.95, sigma_threshold=2)
+get_outlier_score(distribution: List[float], new_value: float, confidence: float = 0.95, sigma_threshold: float = 2) -> int
 ```
 
 Computes whether the incoming ``new_value`` is an outlier with respect to the given ``distribution``. It computes
@@ -156,11 +193,6 @@ a double tailed Dixon's Q-test, with the given ``confidence``, along with testin
 new value considering the boundary (**mean** -``sigma_threshold`` **sigma**, **mean** + ``sigma_threshold``
 **sigma** ). In case the new value is valid the result is 0, otherwise 1 (outside the sigma threshold) or 2 an outlier
 based on Dixon's Q-test with given confidence.
-
-:type distribution: list
-:type new_value: float
-:type confidence: float
-:type sigma_threshold: float
 
 **Arguments**:
 
@@ -178,20 +210,20 @@ available confidence steps are: 0.90, 0.95 and 0.99. Defaults to 0.95. Also perc
 
 0 for valid samples, 1 for outside the sigma threshold ("warning"), 2 for outliers
 
-<a name=".outlier_detector.functions.is_outlier"></a>
+**Raises**:
+
+- `ValueError`: If sigma_threshold is negative or 0
+
+<a name=".functions.is_outlier"></a>
 #### is\_outlier
 
 ```python
-is_outlier(distribution, new_value, confidence=0.95)
+is_outlier(distribution: List[float], new_value: float, confidence: float = 0.95, sigma_threshold: float = 2) -> bool
 ```
 
 Computes whether the incoming ``new_value`` is an outlier with respect to the given ``distribution``. It computes
 a double tailed Dixon's Q-test, with the given ``confidence``. In case the new value is valid the result is False,
 otherwise True.
-
-:type distribution: list
-:type new_value: float
-:type confidence: float
 
 **Arguments**:
 
@@ -206,3 +238,8 @@ available confidence steps are: 0.90, 0.95 and 0.99. Defaults to 0.95. Also perc
 **Returns**:
 
 False for valid samples, True for outliers
+
+**Raises**:
+
+- `ValueError`: when confidence value set is not tabled;
+- `ValueError`: in case distribution  confidence value set is not tabled;

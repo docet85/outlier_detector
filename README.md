@@ -3,6 +3,7 @@
 [![codecov](https://codecov.io/gh/docet85/outlier_detector/branch/dev/graph/badge.svg)](https://codecov.io/gh/docet85/outlier_detector)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 
 
 This project features a set of tools for outlier detection, marking or filtering away samples

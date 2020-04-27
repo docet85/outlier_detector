@@ -1,18 +1,20 @@
+from typing import List
+
 from outlier_detector import Qvals
 
 
-def get_outlier_score(distribution, new_value, confidence=0.95, sigma_threshold=2):
+def get_outlier_score(
+    distribution: List[float],
+    new_value: float,
+    confidence: float = 0.95,
+    sigma_threshold: float = 2,
+) -> int:
     """
     Computes whether the incoming ``new_value`` is an outlier with respect to the given ``distribution``. It computes
     a double tailed Dixon's Q-test, with the given ``confidence``, along with testing the standard deviation of the
     new value considering the boundary (**mean** -``sigma_threshold`` **sigma**, **mean** + ``sigma_threshold``
     **sigma** ). In case the new value is valid the result is 0, otherwise 1 (outside the sigma threshold) or 2 an outlier
     based on Dixon's Q-test with given confidence.
-
-    :type distribution: list
-    :type new_value: float
-    :type confidence: float
-    :type sigma_threshold: float
 
     :param distribution: The incoming numeric set of values representing the distribution. Ideally this has been removed
      the linear monotonic trend or any other drift (in case applicable) so to make it a Gaussian distribution. Any trend
@@ -24,6 +26,7 @@ def get_outlier_score(distribution, new_value, confidence=0.95, sigma_threshold=
     :param sigma_threshold: multiplier for further analysis, samples outside the sigma boundary (**mean** -
     ``sigma_threshold`` **sigma**, **mean** + ``sigma_threshold`` **sigma** ) are marked as "warning"
     :return: 0 for valid samples, 1 for outside the sigma threshold ("warning"), 2 for outliers
+    :raises ValueError: If sigma_threshold is negative or 0
     """
     from statistics import stdev
 
@@ -42,15 +45,16 @@ def get_outlier_score(distribution, new_value, confidence=0.95, sigma_threshold=
     return 0
 
 
-def is_outlier(distribution, new_value, confidence=0.95):
+def is_outlier(
+    distribution: List[float],
+    new_value: float,
+    confidence: float = 0.95,
+    sigma_threshold: float = 2,
+) -> bool:
     """
     Computes whether the incoming ``new_value`` is an outlier with respect to the given ``distribution``. It computes
     a double tailed Dixon's Q-test, with the given ``confidence``. In case the new value is valid the result is False,
     otherwise True.
-
-    :type distribution: list
-    :type new_value: float
-    :type confidence: float
 
     :param distribution: The incoming numeric set of values representing the distribution. Ideally this has been removed
      the linear monotonic trend or any other drift (in case applicable) so to make it a Gaussian distribution. Any trend
@@ -60,6 +64,8 @@ def is_outlier(distribution, new_value, confidence=0.95):
      available confidence steps are: 0.90, 0.95 and 0.99. Defaults to 0.95. Also percentage values are accepted (i.e.
      90, 95 and 99).
     :return: False for valid samples, True for outliers
+    :raises ValueError: when confidence value set is not tabled;
+    :raises ValueError: in case distribution  confidence value set is not tabled;
     """
     from copy import copy
 

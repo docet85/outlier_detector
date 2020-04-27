@@ -1,5 +1,5 @@
 import inspect
-from typing import Any, Optional, Callable, Dict
+from typing import Any, Callable, Dict, List
 from uuid import uuid4
 
 __alive_filters__ = {}
@@ -11,7 +11,9 @@ import logging
 
 
 def filter_outlier(
-        distribution_id: Any = None, strategy: Optional[str] = "recursion", **outlier_detector_kwargs: Dict
+    distribution_id: Any = None,
+    strategy: str = "recursion",
+    **outlier_detector_kwargs: Dict
 ) -> Callable:
     """Wraps a generic "pop" or "get" function, returning a sample of a gaussian distribution, with an outlier filter.
     When meeting an outlier the filter omits it and, depending on the strategy, it may call recursively the wrapped
@@ -87,7 +89,7 @@ def filter_outlier(
         return recursive_outlier_filter_generator
 
 
-def destroy_filter(distribution_id):
+def destroy_filter(distribution_id: Any):
     """
     Given an assigned distribution id, destroys the associated detector below the filter. Since the detector
     is a singleton instantiated on demand, this is the final effect of deleting the recorded samples buffer.
@@ -111,7 +113,22 @@ def _retrieve_filter_instance(
 
 
 class OutlierFilter(OutlierDetector):
-    def __init__(self, strategy="iteration", limit=None, **kwargs):
+    """Exploits an OutlierDetector to expose the same functionality of the filter decorator.
+    It wraps a generic "pop" or "get" function, returning a sample of a gaussian distribution, with an outlier filter.
+    When meeting an outlier the filter omits it and, depending on the strategy, it may raise a ``ValueError``.
+    Relies on ``OutlierDetector`` whose args can be forwarded using the proper argument.
+    """
+
+    def __init__(self, strategy="iteration", limit=None, **outlier_detector_kwargs):
+        """
+
+        :param distribution_id: unique identifier for the distribution. In case empty, this is inferred runtime. In case
+               wrapping a method, the first argument hash is used as default.
+        :param strategy: 'recursion', 'iteration' or 'exception'
+        :param outlier_detector_kwargs: the constructor arguments for the underlying detector
+
+        :raises ValueError: when strategy is invalid
+        """
         if strategy not in __strategies_decorator__:
             raise ValueError(
                 'Strategy "{}" unknown, please pick one in {}'.format(
@@ -119,7 +136,7 @@ class OutlierFilter(OutlierDetector):
                 )
             )
 
-        OutlierDetector.__init__(self, **kwargs)
+        OutlierDetector.__init__(self, **outlier_detector_kwargs)
 
         if strategy == "recursion":
             logging.warning(
@@ -137,7 +154,15 @@ class OutlierFilter(OutlierDetector):
         self.strategy = strategy
         self.__outlier_counter__ = 0
 
-    def filter(self, func, *args, **kwargs):
+    def filter(self, func: Callable, *args: List, **kwargs: Dict) -> float:
+        """
+        :raises OutlierException: when strategy is 'exception' and an outlier is found
+
+        :param func:
+        :param args:
+        :param kwargs:
+        :return:
+        """
         self.__outlier_counter__ = 0
         while self.limit is None or self.__outlier_counter__ <= self.limit:
             sample = func(*args, **kwargs)

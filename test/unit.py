@@ -2,8 +2,8 @@ import unittest
 from copy import copy
 from unittest.mock import patch
 
-from outlier_detector.filters import filter_outlier, OutlierFilter
 from outlier_detector.detectors import OutlierDetector
+from outlier_detector.filters import filter_outlier, OutlierFilter
 from outlier_detector.functions import get_outlier_score, is_outlier
 
 
@@ -133,8 +133,10 @@ class InputValidation(unittest.TestCase):
         self.assertEqual(od.q, Qvals[0.99], "Confidence error")
 
 
-class AuxiliaryTest(unittest.TestCase):
+#     TODO Add tests validating float/numeric input
 
+
+class AuxiliaryTest(unittest.TestCase):
     new_value = 5
     test_odd_sequence = [1, 4, 6, 8, 10]
     test_even_sequence = [1, 4, 6, 8, 10, 12]
@@ -147,56 +149,56 @@ class AuxiliaryTest(unittest.TestCase):
 
     def test_given_first_three_vals_then_insertion_points_are_correct(self):
         self.test_filter._buffer = []
-        insertion_point = self.test_filter._sorted_insert(0)
+        insertion_point = self.test_filter.__sorted_insert__(0)
         self.assertEqual(insertion_point, 0, "Wrong insertion point")
-        insertion_point = self.test_filter._sorted_insert(1)
+        insertion_point = self.test_filter.__sorted_insert__(1)
         self.assertEqual(insertion_point, 1, "Wrong insertion point")
-        insertion_point = self.test_filter._sorted_insert(2)
+        insertion_point = self.test_filter.__sorted_insert__(2)
         self.assertEqual(insertion_point, 2, "Wrong insertion point")
         self.assertEqual(self.test_filter._buffer, [0, 1, 2])
 
     def test_given_new_value_odd_seq_then_insertion_point_is_correct(self):
-        insertion_point = self.test_filter._sorted_insert(self.new_value)
+        insertion_point = self.test_filter.__sorted_insert__(self.new_value)
         self.assertEqual(insertion_point, 2, "Wrong insertion point")
         self.assertEqual(self.test_filter._buffer, self.expected_odd_sequence)
 
     def test_given_new_value_even_seq_then_insertion_point_is_correct(self):
         self.test_filter._buffer = copy(self.test_even_sequence)
-        insertion_point = self.test_filter._sorted_insert(self.new_value)
+        insertion_point = self.test_filter.__sorted_insert__(self.new_value)
         self.assertEqual(insertion_point, 2, "Wrong insertion point")
         self.assertEqual(self.test_filter._buffer, self.expected_even_sequence)
 
     def test_given_new_value_at_first_odd_seq_then_insertion_point_is_correct(self):
-        insertion_point = self.test_filter._sorted_insert(0)
+        insertion_point = self.test_filter.__sorted_insert__(0)
         self.assertEqual(insertion_point, 0, "Wrong insertion point")
         self.assertEqual(self.test_filter._buffer, [0] + self.test_odd_sequence)
 
     def test_given_new_value_at_first_even_seq_then_insertion_point_is_correct(self):
         self.test_filter._buffer = copy(self.test_even_sequence)
-        insertion_point = self.test_filter._sorted_insert(0)
+        insertion_point = self.test_filter.__sorted_insert__(0)
         self.assertEqual(insertion_point, 0, "Wrong insertion point")
         self.assertEqual(self.test_filter._buffer, [0] + self.test_even_sequence)
 
     def test_given_new_value_at_last_odd_seq_then_insertion_point_is_correct(self):
-        insertion_point = self.test_filter._sorted_insert(15)
+        insertion_point = self.test_filter.__sorted_insert__(15)
         self.assertEqual(insertion_point, 5, "Wrong insertion point")
         self.assertEqual(self.test_filter._buffer, self.test_odd_sequence + [15])
 
     def test_given_new_value_at_last_even_seq_then_insertion_point_is_correct(self):
         self.test_filter._buffer = copy(self.test_even_sequence)
-        insertion_point = self.test_filter._sorted_insert(15)
+        insertion_point = self.test_filter.__sorted_insert__(15)
         self.assertEqual(insertion_point, 6, "Wrong insertion point")
         self.assertEqual(self.test_filter._buffer, self.test_even_sequence + [15])
 
     def test_given_invalid_start_then_raise_assertion_error(self):
         try:
-            self.test_filter._sorted_insert(4, 0.5, len(self.test_even_sequence))
+            self.test_filter.__sorted_insert__(4, 0.5, len(self.test_even_sequence))
             self.fail("Start float, assertion fail expected")
         except AssertionError:
             pass
 
         try:
-            self.test_filter._sorted_insert(
+            self.test_filter.__sorted_insert__(
                 4, len(self.test_even_sequence) + 2, len(self.test_even_sequence)
             )
             self.fail("Start out of bounds, assertion fail expected")
@@ -204,33 +206,33 @@ class AuxiliaryTest(unittest.TestCase):
             pass
 
         try:
-            self.test_filter._sorted_insert(4, -1, len(self.test_even_sequence))
+            self.test_filter.__sorted_insert__(4, -1, len(self.test_even_sequence))
             self.fail("Start out of bounds, assertion fail expected")
         except AssertionError:
             pass
 
     def test_given_invalid_end_then_raise_assertion_error(self):
         try:
-            self.test_filter._sorted_insert(4, 0, 3.5)
+            self.test_filter.__sorted_insert__(4, 0, 3.5)
             self.fail("Start float, assertion fail expected")
         except AssertionError:
             pass
 
         try:
-            self.test_filter._sorted_insert(4, 0, len(self.test_even_sequence) + 2)
+            self.test_filter.__sorted_insert__(4, 0, len(self.test_even_sequence) + 2)
             self.fail("Start out of bounds, assertion fail expected")
         except AssertionError:
             pass
 
         try:
-            self.test_filter._sorted_insert(4, 0, -1)
+            self.test_filter.__sorted_insert__(4, 0, -1)
             self.fail("Start out of bounds, assertion fail expected")
         except AssertionError:
             pass
 
     def test_given_start_greater_than_end_then_raise_assertion_error(self):
         try:
-            self.test_filter._sorted_insert(4, 3, 1)
+            self.test_filter.__sorted_insert__(4, 3, 1)
             self.fail("Start out of bounds, assertion fail expected")
         except AssertionError:
             pass
