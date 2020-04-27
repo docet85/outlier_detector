@@ -3,7 +3,8 @@ from typing import Any, Callable, Dict, List
 from uuid import uuid4
 
 __alive_filters__ = {}
-__strategies_decorator__ = ["recursion", "iteration", "exception"]
+__strategies_decorator__ = ["recursion", "iteration", "exception", "generation"]
+__strategies_obj__ = ["recursion", "iteration", "exception"]
 
 from outlier_detector.exceptions import OutlierException
 from outlier_detector.detectors import OutlierDetector
@@ -17,12 +18,12 @@ def filter_outlier(
 ) -> Callable:
     """Wraps a generic "pop" or "get" function, returning a sample of a gaussian distribution, with an outlier filter.
     When meeting an outlier the filter omits it and, depending on the strategy, it may call recursively the wrapped
-    function, iteratively call the wrapped function or raising a ``ValueError``. Relies on ``OutlierDetector`` whose
-    args can be forwarded using the proper argument.
+    function, iteratively call the wrapped function, raise an ``OutlierException``, or wrap it in a generator. It
+    relies on ``OutlierDetector`` whose args can be forwarded using the proper argument.
 
     :param distribution_id: unique identifier for the distribution. In case empty, this is inferred runtime. In case
            wrapping a method, the first argument hash is used as default.
-    :param strategy: 'recursion', 'iteration' or 'exception'
+    :param strategy: 'recursion', 'iteration', 'exception' or 'generation'
     :param outlier_detector_kwargs: the constructor arguments for the underlying detector
 
     :raises ValueError: when strategy is invalid
@@ -42,7 +43,7 @@ def filter_outlier(
 
     if strategy == "iteration":
 
-        def iterative_outlier_filter_generator(func):
+        def iterative_outlier_filter(func):
             def wrapper(*args, **kwargs):
                 od = _retrieve_filter_instance(
                     func, args, d_id, distribution_id, **outlier_detector_kwargs
@@ -54,10 +55,25 @@ def filter_outlier(
 
             return wrapper
 
-        return iterative_outlier_filter_generator
+        return iterative_outlier_filter
+    elif strategy == "generation":
+
+        def generative_outlier_filter(func):
+            def wrapper(*args, **kwargs):
+                od = _retrieve_filter_instance(
+                    func, args, d_id, distribution_id, **outlier_detector_kwargs
+                )
+                while True:
+                    sample = func(*args, **kwargs)
+                    if not od.is_outlier(sample):
+                        yield sample
+
+            return wrapper
+
+        return generative_outlier_filter
     elif strategy == "exception":
 
-        def exception_outlier_filter_generator(func):
+        def exception_outlier_filter(func):
             def wrapper(*args, **kwargs):
                 od = _retrieve_filter_instance(
                     func, args, d_id, distribution_id, **outlier_detector_kwargs
@@ -70,10 +86,10 @@ def filter_outlier(
 
             return wrapper
 
-        return exception_outlier_filter_generator
+        return exception_outlier_filter
     else:
 
-        def recursive_outlier_filter_generator(func):
+        def recursive_outlier_filter(func):
             def wrapper(*args, **kwargs):
                 od = _retrieve_filter_instance(
                     func, args, d_id, distribution_id, **outlier_detector_kwargs
@@ -86,7 +102,7 @@ def filter_outlier(
 
             return wrapper
 
-        return recursive_outlier_filter_generator
+        return recursive_outlier_filter
 
 
 def destroy_filter(distribution_id: Any):
@@ -129,10 +145,10 @@ class OutlierFilter(OutlierDetector):
 
         :raises ValueError: when strategy is invalid
         """
-        if strategy not in __strategies_decorator__:
+        if strategy not in __strategies_obj__:
             raise ValueError(
                 'Strategy "{}" unknown, please pick one in {}'.format(
-                    strategy, __strategies_decorator__
+                    strategy, __strategies_obj__
                 )
             )
 
