@@ -1,3 +1,4 @@
+from numbers import Real
 from typing import List
 
 from outlier_detector import Qvals
@@ -46,10 +47,7 @@ def get_outlier_score(
 
 
 def is_outlier(
-    distribution: List[float],
-    new_value: float,
-    confidence: float = 0.95,
-    sigma_threshold: float = 2,
+    distribution: List[float], new_value: float, confidence: float = 0.95
 ) -> bool:
     """
     Computes whether the incoming ``new_value`` is an outlier with respect to the given ``distribution``. It computes
@@ -75,9 +73,27 @@ def is_outlier(
         raise ValueError(
             "Confidence value not tabled, please choose between 0.90, 0.95, and 0.99"
         )
+    if not isinstance(distribution, List):
+        raise TypeError(
+            'Cannot search outliers in not Iterable datatypes "{}"'.format(
+                type(distribution).__name__
+            )
+        )
     if len(distribution) < 5 or len(distribution) > 27:
         raise ValueError(
             "Input distribution must have at least 5 elements and no more than 27"
+        )
+    if not isinstance(distribution[0], Real):
+        raise TypeError(
+            'Cannot search outliers in not-a-numeric-list datatypes "List[{}]"'.format(
+                type(distribution[0]).__name__
+            )
+        )
+    if not isinstance(new_value, Real):
+        raise TypeError(
+            'Cannot search outliers of not numeric or not compatible datatypes "{}"'.format(
+                type(new_value).__name__
+            )
         )
 
     q_vals = Qvals[confidence]

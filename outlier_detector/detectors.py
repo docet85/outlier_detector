@@ -1,3 +1,4 @@
+from numbers import Real
 from statistics import stdev
 
 from outlier_detector import Qvals
@@ -55,6 +56,13 @@ class OutlierDetector:
         :param new_sample: distribution new sample
         :return: true in case the sample is outlier
         """
+        if not isinstance(new_sample, Real):
+            raise TypeError(
+                'Cannot search outliers of not numeric or not compatible datatypes "{}"'.format(
+                    type(new_sample).__name__
+                )
+            )
+
         old_sample_position = len(self._buffer)
 
         # we don't want to produce results if we don't have at least half the buffer
@@ -114,6 +122,12 @@ class OutlierDetector:
         :param new_sample: distribution new sample
         :return: 0 for valid samples, 1 for warning, 2 for outliers
         """
+        if not isinstance(new_sample, Real):
+            raise TypeError(
+                'Cannot search outliers of not numeric or not compatible datatypes "{}"'.format(
+                    type(new_sample).__name__
+                )
+            )
         result = 0  # valid sample
         old_sample_position = len(self._buffer)
 

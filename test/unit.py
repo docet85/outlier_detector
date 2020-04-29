@@ -14,6 +14,23 @@ class InputValidation(unittest.TestCase):
         self.sample = 4
 
     # Function
+    def test_given_invalid_type_sample_then_raise(self):
+        self.assertRaises(TypeError, get_outlier_score, self.dist, "wrong")
+
+    def test_given_invalid_type_distribution_then_raise(self):
+        self.assertRaises(
+            TypeError,
+            get_outlier_score,
+            "definitely wrong, so wrong indeed",
+            self.sample,
+        )
+        self.assertRaises(
+            TypeError,
+            get_outlier_score,
+            ["definitely", "wrong", "so", "wrong", "indeed"],
+            self.sample,
+        )
+
     def test_given_short_distribution_then_raise(self):
         self.assertRaises(ValueError, get_outlier_score, self.dist[:3], self.sample)
 
