@@ -156,6 +156,20 @@ class EndToEndTest(unittest.TestCase):
             self.assertLessEqual(r, 4, "Not filtered outlier")
             self.assertGreaterEqual(r, 0, "Not filtered outlier")
 
+    def test_filter_decorator_generative(self):
+        class TempTestGen(TestGen):
+            @filter_outlier(strategy="generation")
+            def pop(self):
+                return super().pop()
+
+        tg = TempTestGen(self.aset)
+        try:
+            for sample in tg.pop():
+                self.assertLessEqual(sample, 4, "Not filtered outlier")
+                self.assertGreaterEqual(sample, 0, "Not filtered outlier")
+        except IndexError:
+            pass
+
     def test_filter_decorator_raising(self):
         class TempTestGen(TestGen):
             @filter_outlier(strategy="exception")
@@ -189,8 +203,8 @@ class EndToEndTest(unittest.TestCase):
             pass
         self.assertGreater(counter, 0, "Iterator not run or no test data")
 
-    def test_filter_object_exception(self):
-        of = OutlierFilter()
+    def test_filter_object_exception_while_true(self):
+        of = OutlierFilter(strategy="exception")
         tg = TestGen(self.aset)
         filtered_sample = of.filter(tg.pop)
         counter = 0
@@ -202,8 +216,41 @@ class EndToEndTest(unittest.TestCase):
                 valid = 0 < e.value < 4
                 self.assertFalse(valid, "Filtered valid data")
                 continue
-            except IndexError:
+            except (IndexError, StopIteration):
                 break
             self.assertLessEqual(sample, 4, "Not filtered outlier")
             self.assertGreaterEqual(sample, 0, "Not filtered outlier")
         self.assertGreater(counter, 0, "Iterator not run or no test data")
+
+    def test_filter_object_exception_for(self):
+        of = OutlierFilter(strategy="exception")
+        tg = TestGen(self.aset)
+        counter = 0
+        while True:
+            try:
+                for sample in of.filter(tg.pop):
+                    self.assertLessEqual(sample, 4, "Not filtered outlier")
+                    self.assertGreaterEqual(sample, 0, "Not filtered outlier")
+                    counter += 1
+            except OutlierException as e:
+                valid = 0 < e.value < 4
+                self.assertFalse(valid, "Filtered valid data")
+                counter += 1
+                continue
+            except IndexError:
+                break
+        self.assertGreater(counter, 0, "Iterator not run or no test data")
+
+    def test_filter_object_iterative_limit(self):
+        of = OutlierFilter(limit=1)
+        tg = TestGen(self.aset)
+        counter = 0
+        try:
+            for sample in of.filter(tg.pop):
+                counter += 1
+                self.assertLessEqual(sample, 4, "Not filtered outlier")
+                self.assertGreaterEqual(sample, 0, "Not filtered outlier")
+        except OutlierException:
+            self.assertGreater(counter, 0, "Iterator not run or no test data")
+            return
+        self.fail("Expected to hit the outlier limit")

@@ -75,7 +75,7 @@ def is_outlier(
         )
     if not isinstance(distribution, List):
         raise TypeError(
-            'Cannot search outliers in not Iterable datatypes "{}"'.format(
+            'Cannot search outliers in not List datatypes "{}"'.format(
                 type(distribution).__name__
             )
         )

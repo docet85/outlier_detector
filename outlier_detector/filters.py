@@ -1,5 +1,5 @@
 import inspect
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, List, Iterator
 from uuid import uuid4
 
 __alive_filters__ = {}
@@ -170,14 +170,13 @@ class OutlierFilter(OutlierDetector):
         self.strategy = strategy
         self.__outlier_counter__ = 0
 
-    def filter(self, func: Callable, *args: List, **kwargs: Dict) -> float:
+    def filter(self, func: Callable, *args: List, **kwargs: Dict) -> Iterator[float]:
         """
         :raises OutlierException: when strategy is 'exception' and an outlier is found
 
         :param func:
         :param args:
         :param kwargs:
-        :return:
         """
         self.__outlier_counter__ = 0
         while self.limit is None or self.__outlier_counter__ <= self.limit:
@@ -190,4 +189,7 @@ class OutlierFilter(OutlierDetector):
                     raise OutlierException("Detected Outlier in distribution", sample)
                 if self.limit is not None:
                     self.__outlier_counter__ += 1
-        raise StopIteration("Limit hit for subsequent outliers discarded.")
+        if self.limit:
+            raise OutlierException(
+                "Limit of {} subsequent outliers reached", self.limit
+            )

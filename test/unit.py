@@ -72,6 +72,20 @@ class InputValidation(unittest.TestCase):
         except ValueError:
             pass
 
+    def test_given_invalid_type_sample_to_decorator_then_raise(self):
+        try:
+
+            class FailGen:
+                @filter_outlier()
+                def pop(self):
+                    return "spam"
+
+            fg = FailGen()
+            fg.pop()
+            self.fail("The function return type is not rejected as invalid")
+        except TypeError:
+            pass
+
     @patch("outlier_detector.detectors.OutlierDetector.is_outlier", return_value=False)
     @patch("outlier_detector.detectors.OutlierDetector.__init__", return_value=None)
     def test_given_extra_input_to_decorator_then_they_are_forwarded_to_detector(
@@ -134,14 +148,14 @@ class InputValidation(unittest.TestCase):
     def test_given_long_buffer_then_raise(self):
         self.assertRaises(ValueError, OutlierDetector, buffer_samples=30)
 
-    def test_given_invalid_confidence_for_detector_then_raise(self):
+    def test_given_invalid_confidence_to_detector_then_raise(self):
         self.assertRaises(ValueError, OutlierDetector, confidence=0.2)
 
-    def test_given_invalid_sigma_threshold_for_detector_then_raise(self):
+    def test_given_invalid_sigma_threshold_to_detector_then_raise(self):
         self.assertRaises(ValueError, OutlierDetector, sigma_threshold=0)
         self.assertRaises(ValueError, OutlierDetector, sigma_threshold=-1)
 
-    def test_given_valid_sigma_threshold_for_detector_then_set_it(self):
+    def test_given_valid_sigma_threshold_to_detector_then_set_it(self):
         from outlier_detector import Qvals
 
         od = OutlierDetector(confidence=0.99)
@@ -149,8 +163,13 @@ class InputValidation(unittest.TestCase):
         od = OutlierDetector(confidence=99)
         self.assertEqual(od.q, Qvals[0.99], "Confidence error")
 
-
-#     TODO Add tests validating float/numeric input
+    def test_given_invalid_sample_type_to_detector_then_raise(self):
+        od = OutlierDetector()
+        try:
+            od.is_outlier("spam")
+            self.fail("Detector not rejecting invalid input type")
+        except TypeError:
+            pass
 
 
 class AuxiliaryTest(unittest.TestCase):
