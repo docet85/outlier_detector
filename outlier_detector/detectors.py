@@ -1,5 +1,7 @@
+from numbers import Real
+from statistics import stdev
+
 from outlier_detector import Qvals
-from statistics import stdev, StatisticsError
 
 
 class OutlierDetector:
@@ -11,12 +13,13 @@ class OutlierDetector:
     **sigma**, **mean** + ``sigma_threshold``  **sigma** ).
     """
 
-    def __init__(self, confidence=0.95, buffer_samples=14, sigma_threshold=2):
+    def __init__(
+        self,
+        confidence: float = 0.95,
+        buffer_samples: int = 14,
+        sigma_threshold: float = 2,
+    ) -> None:
         """
-        :type buffer_samples: int
-        :type confidence: float
-        :type sigma_threshold: float
-
         :param buffer_samples: Accepted length is between 5 and 27 samples.
         :param confidence: The confidence for the outlier estimation: since Dixon's test relies on tabled values the
                available confidence steps are: 0.90, 0.95 and 0.99. Defaults to 0.95. Also percentage values are
@@ -44,21 +47,27 @@ class OutlierDetector:
         self._map = []
         return
 
-    def is_outlier(self, new_sample):
+    def is_outlier(self, new_sample: float) -> bool:
         """
         Evaluates the incoming sample and (in case it is valid) stores it in internal buffer.
 
         Testes if the sample an outlier is an outlier based on Dixon's Q-test with given confidence.
 
-        :type new_sample: float
         :param new_sample: distribution new sample
         :return: true in case the sample is outlier
         """
+        if not isinstance(new_sample, Real):
+            raise TypeError(
+                'Cannot search outliers of not numeric or not compatible datatypes "{}"'.format(
+                    type(new_sample).__name__
+                )
+            )
+
         old_sample_position = len(self._buffer)
 
         # we don't want to produce results if we don't have at least half the buffer
         if len(self._buffer) >= self.buffer_samples / 2 and len(self._buffer) >= 5:
-            insertion_point = self._sorted_insert(new_sample)
+            insertion_point = self.__sorted_insert__(new_sample)
 
             q = 0
             if insertion_point == 0:
@@ -80,7 +89,7 @@ class OutlierDetector:
                 del self._map[0]
                 del self._buffer[old_sample_position]
         else:
-            insertion_point = self._sorted_insert(new_sample)
+            insertion_point = self.__sorted_insert__(new_sample)
 
         if old_sample_position != insertion_point:
             for i in range(len(self._map)):
@@ -93,28 +102,32 @@ class OutlierDetector:
 
         return False
 
-    def is_outside_sigma_bound(self, new_sample):
+    def is_outside_sigma_bound(self, new_sample: float) -> bool:
         """
         Evaluates the incoming sample and (in case it is valid) stores it in internal buffer.
 
         In case the new value is valid the result is False, otherwise if outside the sigma threshold.
 
-        :type new_sample: float
         :param new_sample: distribution new sample
         :return: True for "warnings" and False for valid samples
         """
         return self.get_outlier_score(new_sample) > 0
 
-    def get_outlier_score(self, new_sample):
+    def get_outlier_score(self, new_sample: float) -> int:
         """
         Evaluates the incoming sample and (in case it is valid) stores it in internal buffer.
 
         In case the new value is valid the result is 0, otherwise 1 (outside the sigma threshold) or 2 an outlier
         based on Dixon's Q-test with given confidence.
-        :type new_sample: float
         :param new_sample: distribution new sample
         :return: 0 for valid samples, 1 for warning, 2 for outliers
         """
+        if not isinstance(new_sample, Real):
+            raise TypeError(
+                'Cannot search outliers of not numeric or not compatible datatypes "{}"'.format(
+                    type(new_sample).__name__
+                )
+            )
         result = 0  # valid sample
         old_sample_position = len(self._buffer)
 
@@ -123,7 +136,7 @@ class OutlierDetector:
             mu = sum(self._buffer) / float(len(self._buffer))
             sd = stdev(self._buffer)
 
-            insertion_point = self._sorted_insert(new_sample)
+            insertion_point = self.__sorted_insert__(new_sample)
 
             q = 0
             if insertion_point == 0:
@@ -150,7 +163,7 @@ class OutlierDetector:
                 del self._map[0]
                 del self._buffer[old_sample_position]
         else:
-            insertion_point = self._sorted_insert(new_sample)
+            insertion_point = self.__sorted_insert__(new_sample)
 
         if old_sample_position != insertion_point:
             for i in range(len(self._map)):
@@ -163,7 +176,7 @@ class OutlierDetector:
 
         return result
 
-    def _sorted_insert(self, new_value, start=0, end=None):
+    def __sorted_insert__(self, new_value, start=0, end=None):
         if end is None:
             end = len(self._buffer)
         assert type(start) is int
@@ -176,9 +189,9 @@ class OutlierDetector:
         insertion = pivot
         if start != end:
             if new_value > self._buffer[pivot]:
-                return self._sorted_insert(new_value, pivot + 1, end)
+                return self.__sorted_insert__(new_value, pivot + 1, end)
             elif new_value < self._buffer[pivot]:
-                return self._sorted_insert(new_value, start, pivot)
+                return self.__sorted_insert__(new_value, start, pivot)
         else:
             insertion = start
         self._buffer.insert(insertion, new_value)

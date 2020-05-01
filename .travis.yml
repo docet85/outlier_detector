@@ -1,10 +1,14 @@
 language: python
 python:
+- '3.5'
 - '3.6'
 - '3.7'
 - '3.8'
-- 3.8-dev
-- nightly
+- '3.8-dev'
+- 'nightly'
+jobs:
+  allow_failures:
+    - python: 'nightly'
 install:
 - pip install -r ci_requirements.txt
 script:

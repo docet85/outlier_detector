@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="outlier_detector",
-    version="0.0.2",
+    version="dev",
     author="Fabio Veronese",
     author_email="fveronese85@gmail.com",
     description="Minimal tool for outliers detection on small samples set",
@@ -18,5 +18,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.6",
+    python_requires=">=3.5",
 )

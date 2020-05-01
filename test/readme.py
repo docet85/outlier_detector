@@ -1,5 +1,7 @@
 import unittest
 
+from logging import debug as print
+
 
 class ReadMeTests(unittest.TestCase):
     def test_function_example(self):
@@ -39,3 +41,23 @@ class ReadMeTests(unittest.TestCase):
             except IndexError:
                 print("No more data")
                 break
+
+    def test_filter_object_example(self):
+        distribution = [0.1, 1.1, 4.78, 2.0, 7.2, 5.3, 8.1, -14.1, 5.4]
+        from outlier_detector.filters import OutlierFilter
+
+        class MyGen:
+            def __init__(self):
+                self.cursor = -1
+
+            def pop(self):
+                self.cursor += 1
+                return distribution[self.cursor]
+
+        g = MyGen()
+        of = OutlierFilter()
+        try:
+            for sample in of.filter(g.pop):
+                print(sample)
+        except IndexError:
+            print("No more data")

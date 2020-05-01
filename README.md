@@ -3,6 +3,7 @@
 [![codecov](https://codecov.io/gh/docet85/outlier_detector/branch/dev/graph/badge.svg)](https://codecov.io/gh/docet85/outlier_detector)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 
 
 This project features a set of tools for outlier detection, marking or filtering away samples
@@ -67,6 +68,34 @@ while True:
     except IndexError:
         print('No more data')
         break
+
+```
+</details>
+
+<details>
+   <summary>I have a generating object from which I <code>pop</code> samples; and I want to iterate only on valid samples:
+    how can I reject outliers and get an iterator?</summary>
+
+```python
+distribution = [0.1, 1.1, 4.78, 2.0, 7.2, 5.3, 8.1, -14.1, 5.4]
+from outlier_detector.filters import OutlierFilter
+
+class MyGen:
+    def __init__(self):
+        self.cursor = -1
+
+    def pop(self):
+        self.cursor += 1
+        return distribution[self.cursor]
+
+g = MyGen()
+of = OutlierFilter()
+try:
+    for sample in of.filter(g.pop):
+        print(sample)
+except IndexError:
+    print('No more data')
+
 
 ```
 </details>
