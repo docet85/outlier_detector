@@ -2,6 +2,7 @@
 ## Unreleased
 ### Added
 ### Fixed
+- Pipeline builds in separate stage to avoid conflicts
 ### Changed
 ### Removed
 

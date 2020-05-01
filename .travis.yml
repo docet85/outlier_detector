@@ -6,19 +6,27 @@ python:
 - '3.8'
 - '3.8-dev'
 - 'nightly'
-jobs:
-  allow_failures:
-    - python: 'nightly'
 install:
 - pip install -r ci_requirements.txt
 script:
 - coverage run --source='outlier_detector' -m unittest test/*.py
+- pip install .
 after_success:
 - codecov
-deploy:
-  provider: pypi
-  user: __token__
-  password:
-    secure: Qo2hIbRYge2/9vhaaMf4K+XaR04BZk1oSYikBzY8Xnya6gy861Zs+OrnFbxTu/j1jwzie1z30VJGYe+5j4sALUFen0/cQ0qCF2KjgAo8KAks9+PpORuwZ4CKWUcinkwip/R+/oq8+5rGGo56wXGNC32o+PhrCcViUU8YgVaeAu/yW2zETKtnugFp28lWoVJUjlOtCcU2eqtRqwj6e5CyxUc2cxYMn1Xp0wY1e0wihwH5kDjtfuvyoRk2I7X2V5y8xRWAdgINDMgF/1IQb6hRkgMH+toCybwppT/WVZGeH7BAv3De+JgeFFZlpQhf+kDM+VL8JctrwXuJcR3PWnHaZ0WOygb2Z2yyL/ToC5smGzDNQcedX2E1HujXIqY5cmAaNu6zuSJvDnpY1PjNyjpNklQbL3XcPhDJppyI7XTW4Mna3Oud1RrGnE/D9+tWLm/6U9GOz8G+1ilMPBXVfc80P6TsjjdHYg4cKJVj61cp6+tXKg07r9eiQwu4oOXQIwe3ybaIwzhnj9WfGpddOY0jB2t2VYEDVJ0OwJMNQqolvaU2yjN8J41mJBv40sBsttvC7ZFnWYgCauK/ogRD4XvXu1OE1CLesEo2COCf2aouwDSxDz7xEMIPqzpxtdhw6za91dvgeMjeBLIUAZm+OLlURJx4Ozx0ZW+j3/AOYOdWT7g=
-  on:
-    tags: true
+
+jobs:
+  allow_failures:
+    - python: 'nightly'
+  include:
+    - stage: build
+      python: "3.7"
+      script: echo "Starting Pypi build"
+      deploy:
+        provider: pypi
+        user: __token__
+        password:
+          secure: Qo2hIbRYge2/9vhaaMf4K+XaR04BZk1oSYikBzY8Xnya6gy861Zs+OrnFbxTu/j1jwzie1z30VJGYe+5j4sALUFen0/cQ0qCF2KjgAo8KAks9+PpORuwZ4CKWUcinkwip/R+/oq8+5rGGo56wXGNC32o+PhrCcViUU8YgVaeAu/yW2zETKtnugFp28lWoVJUjlOtCcU2eqtRqwj6e5CyxUc2cxYMn1Xp0wY1e0wihwH5kDjtfuvyoRk2I7X2V5y8xRWAdgINDMgF/1IQb6hRkgMH+toCybwppT/WVZGeH7BAv3De+JgeFFZlpQhf+kDM+VL8JctrwXuJcR3PWnHaZ0WOygb2Z2yyL/ToC5smGzDNQcedX2E1HujXIqY5cmAaNu6zuSJvDnpY1PjNyjpNklQbL3XcPhDJppyI7XTW4Mna3Oud1RrGnE/D9+tWLm/6U9GOz8G+1ilMPBXVfc80P6TsjjdHYg4cKJVj61cp6+tXKg07r9eiQwu4oOXQIwe3ybaIwzhnj9WfGpddOY0jB2t2VYEDVJ0OwJMNQqolvaU2yjN8J41mJBv40sBsttvC7ZFnWYgCauK/ogRD4XvXu1OE1CLesEo2COCf2aouwDSxDz7xEMIPqzpxtdhw6za91dvgeMjeBLIUAZm+OLlURJx4Ozx0ZW+j3/AOYOdWT7g=
+        on:
+          tags: true
+          branch: master
+        skip_existing: true
