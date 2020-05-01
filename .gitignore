@@ -93,7 +93,8 @@ _sass_cache_*.css
 
 # -- distribution --#
 distrib*
-
-# -- Numpy temp and datasets -- #
-/data/tmp
-/data
+/build/
+/dist/
+/outlier_detector.egg-info/
+/htmlcov/
+/.coverage
