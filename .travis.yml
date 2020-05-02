@@ -6,10 +6,8 @@ python:
 - '3.8'
 - '3.8-dev'
 - 'nightly'
-install:
-- pip install -r ci_requirements.txt
 script:
-- coverage run --source='outlier_detector' -m unittest test/*.py
+- python -m unittest test/*.py
 jobs:
   allow_failures:
     - python: 'nightly'
@@ -18,6 +16,7 @@ jobs:
       python: "3.7"
       script:
       - echo "Forwarding coverage results to Codecov"
+      - coverage run --source='outlier_detector' -m unittest test/*.py
       - codecov
     - stage: build
       python: "3.7"
