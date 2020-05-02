@@ -10,14 +10,15 @@ install:
 - pip install -r ci_requirements.txt
 script:
 - coverage run --source='outlier_detector' -m unittest test/*.py
-- pip install .
-after_success:
-- codecov
-
 jobs:
   allow_failures:
     - python: 'nightly'
   include:
+    - stage: codecov
+      python: "3.7"
+      script:
+      - echo "Forwarding coverage results to Codecov"
+      - codecov
     - stage: build
       python: "3.7"
       script: echo "Starting Pypi build"
