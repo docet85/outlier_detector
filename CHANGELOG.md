@@ -3,6 +3,7 @@
 ### Added
 ### Fixed
 - Pipeline builds in separate stage to avoid conflicts
+- Coverage computed only once on target Python version
 ### Changed
 ### Removed
 

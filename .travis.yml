@@ -2,7 +2,6 @@ language: python
 python:
 - '3.5'
 - '3.6'
-- '3.7'
 - '3.8'
 - '3.8-dev'
 - 'nightly'
@@ -15,7 +14,8 @@ jobs:
     - stage: codecov
       python: "3.7"
       script:
-      - echo "Forwarding coverage results to Codecov"
+      - echo "Testing with coverage and returning results to Codecov"
+      - pip install -r ci_requirements.txt
       - coverage run --source='outlier_detector' -m unittest test/*.py
       - codecov
     - stage: build
