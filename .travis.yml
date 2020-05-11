@@ -15,7 +15,7 @@ jobs:
       python: "3.7"
       script:
       - echo "Testing with coverage and returning results to Codecov"
-      - pip install -r ci_requirements.txt
+      - pip install -r requirements_cicd.txt
       - coverage run --source='outlier_detector' -m unittest test/*.py
       - codecov
     - stage: build

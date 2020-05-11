@@ -91,10 +91,13 @@ _sass_cache_*.css
 /bin
 /out
 
-# -- distribution --#
+# -- distribution -- #
 distrib*
 /build/
 /dist/
 /outlier_detector.egg-info/
 /htmlcov/
 /.coverage
+
+# -- venv -- #
+/venv/
