@@ -104,4 +104,4 @@ except IndexError:
 The toolkit is organized so you can exploit one of the following pattern in the easiest way possible:
 `functions` for static analysis, `detectors` for objects with internal buffers, and `filters` for decorators.
 
-For documentation see [doc file](https://github.com/docet85/outlier_detector/blob/dev/DOC.md)
+For documentation see [doc file](https://github.com/docet85/outlier_detector/blob/master/docs/DOC.md)
