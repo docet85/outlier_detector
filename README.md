@@ -18,7 +18,7 @@ pip install outlier-detector
 
 ## TL;DR
 <details>
-   <summary>I have a <code>sample</code>, and a know data <code>distribution</code>: is the sample an outlier?</summary>
+   <summary>I have a <code>sample</code> and a known data <code>distribution</code>: is the sample an outlier?</summary>
 
 ```python
 sample = -14.5
@@ -44,7 +44,7 @@ for sample in distribution:
 </details>
 
 <details>
-   <summary>I have a generating object from which I <code>pop</code> samples; and I want only valid samples:
+   <summary>I have a generating object from which I <code>pop</code> samples, and I want only valid samples:
     how can I reject outliers?</summary>
 
 ```python
@@ -73,7 +73,7 @@ while True:
 </details>
 
 <details>
-   <summary>I have a generating object from which I <code>pop</code> samples; and I want to iterate only on valid samples:
+   <summary>I have a generating object from which I <code>pop</code> samples, and I want to iterate only on valid samples:
     how can I reject outliers and get an iterator?</summary>
 
 ```python
